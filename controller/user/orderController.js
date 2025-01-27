@@ -264,6 +264,8 @@ const handleFailedOrder = async (req, res) => {
 }
 
 
+
+
 const getOrderedProductDetails = async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -284,7 +286,7 @@ const getOrderedProductDetails = async (req, res) => {
       .populate('shippingAddress')
       console.log('order status',order.orderStatus);
       
-
+    
     if (!order) {
       return res.status(404).json({
         success: false,
@@ -292,7 +294,7 @@ const getOrderedProductDetails = async (req, res) => {
       });
     }
 
-    return res.status(200).json({
+return res.status(200).json({
       success: true,
       message: "Order details retrieved successfully",
       order: {
@@ -417,5 +419,5 @@ const cancelOrder = async (req, res) => {
 };
 
 module.exports = {
-  placeOrderList,getOrderedProductDetails,getUserOrders,verifyPayment,handleFailedOrder,checkProductAvailability
+  placeOrderList,getOrderedProductDetails,getUserOrders,verifyPayment,handleFailedOrder,checkProductAvailability,cancelOrder
 };

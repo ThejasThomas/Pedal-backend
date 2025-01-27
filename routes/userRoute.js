@@ -16,6 +16,7 @@ const {placeOrderList,getOrderedProductDetails,getUserOrders,cancelOrder, verify
 const {forgotPassword, verifyForgotPasswordOtp, resetPassword} =require('../controller/user/forgotPasswordController');
 const { addCoupon } = require("../controller/admin/couponController");
 const { fetchCouponDetails } = require("../controller/user/couponUserController");
+const { addFunds, getTransactionHistory, getWalletDetails } = require("../controller/user/walletController");
 userRoute.post("/signup", signup);
 userRoute.post("/verifyOtp", verifyOtp);
 userRoute.post("/resendOtp", resendOtp);
@@ -35,7 +36,7 @@ userRoute.post('/placeorder',verifyUser,placeOrderList)
 userRoute.post('/clearcart/:userId',verifyUser,clearCart)
 userRoute.get('/getorderedproduct/:orderId',verifyUser,getOrderedProductDetails)
 userRoute.get('/getUserOrders/:userId',verifyUser,getUserOrders)
-// userRoute.post('/cancelOrder/:orderId',verifyUser,cancelOrder)
+userRoute.post('/cancelOrder/:orderId',verifyUser,cancelOrder)
 userRoute.post('/forgot-password',forgotPassword)
 userRoute.post('/verifyforgotpassword',verifyForgotPasswordOtp)
 userRoute.post('/reset-password',resetPassword)
@@ -43,6 +44,7 @@ userRoute.post('/apply-coupon',fetchCouponDetails)
 userRoute.post('/verifypayment/:id',verifyPayment)
 userRoute.post('/handlefailureorder/:id',handleFailedOrder)
 userRoute.post('/productavailbale',checkProductAvailability)
-
+userRoute.post('/walletadd',addFunds)
+userRoute.get('/wallet/:userId',getWalletDetails)
 module.exports = userRoute;
 
