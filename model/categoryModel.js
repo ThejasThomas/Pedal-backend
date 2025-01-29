@@ -16,6 +16,10 @@ const categorySchema=new mongoose.Schema({
     cloudinaryId: { 
         type: String
     },
+    offer:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Offer",
+      },
     isActive: {
          type: Boolean,
          default: true },

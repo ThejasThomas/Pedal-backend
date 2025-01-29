@@ -17,6 +17,7 @@ const {forgotPassword, verifyForgotPasswordOtp, resetPassword} =require('../cont
 const { addCoupon } = require("../controller/admin/couponController");
 const { fetchCouponDetails } = require("../controller/user/couponUserController");
 const { addFunds, getTransactionHistory, getWalletDetails } = require("../controller/user/walletController");
+const { addToWishlist, getWishlist, removeFromWishlist } = require("../controller/user/wishlistController");
 userRoute.post("/signup", signup);
 userRoute.post("/verifyOtp", verifyOtp);
 userRoute.post("/resendOtp", resendOtp);
@@ -46,5 +47,8 @@ userRoute.post('/handlefailureorder/:id',handleFailedOrder)
 userRoute.post('/productavailbale',checkProductAvailability)
 userRoute.post('/walletadd',addFunds)
 userRoute.get('/wallet/:userId',getWalletDetails)
+userRoute.post('/addToWishlist',addToWishlist)
+userRoute.get('/getwishlistproducts',getWishlist)
+userRoute.post('/wishlistremoveproducts',removeFromWishlist)
 module.exports = userRoute;
 

@@ -23,6 +23,7 @@ const {
 const { verifyAdmin } = require("../Middleware/userAuth");
 const { getAllOrders,updateOrderStatus,getAllUsers,getOrderDetails } =require('../controller/admin/orderController');
 const { addCoupon, fetchCoupons, deleteCoupon } = require("../controller/admin/couponController");
+const { addProductOffer, getOffer, createCategoryOffer, getAllCategoryOffers, removeCategoryOffer, getProductOffers, removeProductOffer } = require("../controller/admin/offerController");
 
 adminRoute.post("/login", adminLogin);
 adminRoute.post("/addproduct", addProduct);
@@ -44,4 +45,11 @@ adminRoute.put("/updateOrderStatus/:orderId/status", updateOrderStatus);
 adminRoute.post('/addcoupon',addCoupon)
 adminRoute.get('/fetchCoupons',fetchCoupons)
 adminRoute.delete('/deleteCoupon',deleteCoupon)
+adminRoute.post('/addProductOffer',addProductOffer)
+adminRoute.get('/fetchProdOffer',getOffer)
+adminRoute.post('/addCategoryOffer',createCategoryOffer)
+adminRoute.get('/getAllCategoryOffers',getAllCategoryOffers)
+adminRoute.delete('/deleteCategoryOffer/:offerId',removeCategoryOffer)
+adminRoute.get('/getproductoffers',getProductOffers)
+adminRoute.delete('/deleteProductOffers/:offerId',removeProductOffer)
 module.exports = adminRoute;

@@ -3,6 +3,8 @@ const Product = require('../../model/productModel');
 
 
 const fetchproducts =async(req,res)=>{
+  console.log('products');
+  
   try{
      const products = await Product.find()
 
