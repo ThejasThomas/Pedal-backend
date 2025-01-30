@@ -14,7 +14,7 @@ if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
 
 const placeOrderList = async (req, res) => {
   try {
-    const { userId,images, addressId, paymentMethod, items, totalAmount } = req.body;
+    const { userId,images, addressId, paymentMethod, items, totalAmount,couponDiscount } = req.body;
     console.log(req.body);
     if (!userId) {
       return res.status(400).json({
@@ -79,7 +79,12 @@ const placeOrderList = async (req, res) => {
         await Cart.updateOne(
           { userId, "products.productId": item.productId },
           { $set: { "products.$.orderPlaced": true } }
-      );
+      );      
+      const discountType = product.productOffval ? 'Product Offer' : 
+                           (product.catOfferval ? 'Category Offer' : 'No Offer');
+        
+        const discountAmount = product.discountedAmount || 0;
+        const appliedDiscount = product.discountValue || 0;
 
         return {
           product: item.productId,
@@ -88,30 +93,58 @@ const placeOrderList = async (req, res) => {
           productName: product.name,
           productImage: product.images?.[0],
           productDescription: product.description,
+          originalPrice: product.basePrice,
+          couponDiscount: couponDiscount || 0,
+          appliedDiscount: product.discountValue,
+          discountAmount: product.discountedAmount,
+          discountType: product.productOffval ? 'Product Offer' : (product.catOfferval ? 'Category Offer' : 'No Offer'),
+          productOfferValue: product.productOffval,
+          categoryOfferValue: product.catOfferval
         };
       })
 
     );
+
     let razorpayOrder = null;
+
+    const orderData = {
+      user: userId,
+      products: orderProducts,
+      totalAmount,
+      originalTotalAmount: orderProducts.reduce((sum, item) => 
+        sum + (item.originalPrice * item.quantity), 0),
+      totalDiscountAmount: orderProducts.reduce((sum, item) => 
+        sum + ((item.discountAmount || 0) * item.quantity), 0),
+      paymentMethod,
+      shippingAddress: addressId,
+      orderStatus: paymentMethod === 'UPI' ? 'PENDING' : 'ON THE ROAD',
+    };
+
     if (paymentMethod === 'UPI') {
-      razorpayOrder = await razorpay.orders.create({
+      const razorpayOrder = await razorpay.orders.create({
         amount: Math.round(totalAmount * 100),
         currency: 'INR',
         receipt: `order_${Date.now()}`,
         payment_capture: 1
       });
+      orderData.razorpayOrderId = razorpayOrder.id;
     }
 
     const newOrder = new Order({
       user: userId,
       products: orderProducts,
       totalAmount,
+      originalTotalAmount: orderProducts.reduce((sum, item) => sum + (item.originalPrice * item.quantity), 0),
+      totalDiscountAmount: orderProducts.reduce((sum, item) => sum + (item.discountAmount * item.quantity), 0),
       paymentMethod,
+      couponDiscount,
       shippingAddress: addressId,
       orderStatus:paymentMethod === 'UPI' ? 'PENDING' : 'ON THE ROAD',
       razorpayOrderId: razorpayOrder?.id
 
     });
+    console.log('neworder',newOrder);
+    
 
     await newOrder.save();
     await Cart.findOneAndUpdate({ user: userId }, { $set: { products: [] } });
@@ -137,7 +170,8 @@ const placeOrderList = async (req, res) => {
       message: error.message || "Failed to place order",
     });
   }
-};
+}
+
 const checkProductAvailability = async (req, res) => {
   try {
       const { cartItems } = req.body;
