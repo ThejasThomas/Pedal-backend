@@ -21,7 +21,7 @@ const {
   handleUnblockUser,
 } = require("../controller/admin/userManagementController");
 const { verifyAdmin } = require("../Middleware/userAuth");
-const { getAllOrders,updateOrderStatus,getAllUsers,getOrderDetails,} =require('../controller/admin/orderController');
+const { getAllOrders,updateOrderStatus,getAllUsers,getOrderDetails, updateReturnResponse,} =require('../controller/admin/orderController');
 const { addCoupon, fetchCoupons, deleteCoupon } = require("../controller/admin/couponController");
 const { addProductOffer, getOffer, createCategoryOffer, getAllCategoryOffers, removeCategoryOffer, getProductOffers, removeProductOffer } = require("../controller/admin/offerController");
 const { getSalesReport, downloadController } = require("../controller/admin/salesReportController");
@@ -56,4 +56,5 @@ adminRoute.delete('/deleteProductOffers/:offerId',removeProductOffer)
 adminRoute.get('/fetchsalesreport',getSalesReport)
 adminRoute.get('/sales/download/pdf',downloadController.downloadPdf)
 adminRoute.get('/sales/download/excel',downloadController.downloadExcel)
+adminRoute.put('/returnrespond',updateReturnResponse)
 module.exports = adminRoute;

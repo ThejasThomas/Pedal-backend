@@ -29,11 +29,6 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true,  // Make it required if needed
   },
-  discountValue:{
-    type:Number,
-    min:0,
-    default:undefined
-   },
    discountedAmount:{
        type:Number,
        min:0,

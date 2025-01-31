@@ -42,10 +42,23 @@ const orderSchema = new mongoose.Schema(
         discountType: {
           type: String,
           enum: ["Product Offer", "Category Offer", "No Offer"],
-        },
+        },returnReq:{
+                requestStatus:{
+                    type:String,
+                    enum:["Pending","Accepted","Rejected"],
+                },
+                reason:{
+                    type:String,
+                },
+                explanation:{
+                    type:String,
+                }
+             },
         productOfferValue: Number,
         categoryOfferValue: Number,
       },
+      
+      
     ],
     shippingAddress: {
       type: mongoose.Schema.Types.ObjectId,

@@ -172,11 +172,49 @@ const placeOrderList = async (req, res) => {
   }
 }
 
+const returnReqest = async (req, res) => {
+  try {
+    const { reason, explanation, orderId, itemId } = req.body;
+    console.log(req.body);
+    if (!reason || !explanation || !orderId || !itemId) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+    const orderData = await Order.findOne({ _id: orderId });
+    if (!orderData) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+    console.log('rfvtv',orderData);
+    
+    const returnItem = orderData.products.find((item) => item._id.toString() === itemId)
+    console.log("jij8j9iji9m",returnItem);
+    if (!returnItem) {
+      return res.status(404).json({ message: "Item not found in order" });
+    }
+    if (!returnItem.returnReq) {
+      returnItem.returnReq = {};
+    }
+
+    returnItem.returnReq.reason = reason;
+    returnItem.returnReq.explanation = explanation;
+    returnItem.returnReq.requestStatus = "Pending";
+   
+        
+console.log("saving")
+    await orderData.save()
+
+    return res.status(200).json({ message: "Return request registered successfully" })
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "An error occurred while processing the return request" });
+  }
+};
+
+
 const checkProductAvailability = async (req, res) => {
   try {
       const { cartItems } = req.body;
 
-      // Validate input
       if (!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
           return res.status(400).json({
               success: false,
@@ -184,11 +222,9 @@ const checkProductAvailability = async (req, res) => {
           });
       }
 
-      // Check each product's availability
       for (const item of cartItems) {
           const { productId, quantity } = item;
 
-          // Validate item structure
           if (!productId || !quantity) {
               return res.status(400).json({
                   success: false,
@@ -196,10 +232,8 @@ const checkProductAvailability = async (req, res) => {
               });
           }
 
-          // Find the product
           const product = await Product.findById(productId);
 
-          // Check if product exists
           if (!product) {
               return res.status(404).json({
                   success: false,
@@ -207,7 +241,6 @@ const checkProductAvailability = async (req, res) => {
               });
           }
 
-          // Check product availability
           if (product.quantity < quantity) {
               return res.status(400).json({
                   success: false,
@@ -219,7 +252,6 @@ const checkProductAvailability = async (req, res) => {
           }
       }
 
-      // If all products are available
       res.status(200).json({
           success: true,
           message: "All products are available"
@@ -314,7 +346,7 @@ const getOrderedProductDetails = async (req, res) => {
     const order = await Order.findById(orderId)
       .populate("user", "firstName email")
       .populate({
-        path: 'products.product', // Populate the `product` field inside `products`
+        path: 'products.product',
         select: 'name images description price',
       })
       .populate('shippingAddress')
@@ -375,10 +407,10 @@ const getUserOrders = async (req, res) => {
     const orders = await Order.find({ user: userId })
     .populate('user', 'firstName email')
     .populate({
-      path: 'products.product', // Populate the `product` field inside `products`
+      path: 'products.product', 
       select: 'name images description price',
     })
-    .populate('shippingAddress') // Include shipping address details if needed
+    .populate('shippingAddress') 
     .sort({ createdAt: -1 });
   console.log(JSON.stringify(orders, null, 2));
   
@@ -453,5 +485,5 @@ const cancelOrder = async (req, res) => {
 };
 
 module.exports = {
-  placeOrderList,getOrderedProductDetails,getUserOrders,verifyPayment,handleFailedOrder,checkProductAvailability,cancelOrder
+  placeOrderList,getOrderedProductDetails,getUserOrders,verifyPayment,handleFailedOrder,checkProductAvailability,cancelOrder,returnReqest
 };

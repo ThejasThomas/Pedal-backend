@@ -119,15 +119,13 @@ const updateCart = async (req, res) => {
     try {
         const { userId, productId, quantity, price } = req.body;
 
-        // Basic validation
         if (!userId || !productId || !quantity || !price) {
             return res.status(400).json({
                 success: false,
-                message: "All fields are required (userId, productId, quantity, price)"
+                // message: "All fields are required (userId, productId, quantity, price)"
             });
         }
 
-        // Validate quantity is positive
         if (quantity < 1) {
             return res.status(400).json({
                 success: false,
@@ -135,7 +133,6 @@ const updateCart = async (req, res) => {
             });
         }
 
-        // Check product exists and has enough stock
         const product = await Product.findById(productId);
         if (!product) {
             return res.status(404).json({
@@ -144,7 +141,6 @@ const updateCart = async (req, res) => {
             });
         }
 
-        // Check maximum quantity limit
         if (quantity > 15) {
             return res.status(400).json({
                 success: false,
@@ -154,7 +150,6 @@ const updateCart = async (req, res) => {
             });
         }
 
-        // Check stock availability
         if (product.quantity < quantity) {
             return res.status(400).json({
                 success: false,
@@ -164,7 +159,7 @@ const updateCart = async (req, res) => {
             });
         }
 
-        // Find user's cart
+    
         let cart = await Cart.findOne({ userId });
         if (!cart) {
             return res.status(404).json({
@@ -173,7 +168,6 @@ const updateCart = async (req, res) => {
             });
         }
 
-        // Update product quantity in cart
         const productIndex = cart.products.findIndex(
             item => item.productId.toString() === productId
         );
@@ -185,20 +179,16 @@ const updateCart = async (req, res) => {
             });
         }
 
-        // Update product quantity and total price
         cart.products[productIndex].quantity = quantity;
         cart.products[productIndex].totalPrice = quantity * price;
 
-        // Recalculate cart total
         cart.cartTotal = cart.products.reduce(
             (total, item) => total + item.totalPrice, 
             0
         );
 
-        // Save updated cart
         await cart.save();
 
-        // Return updated cart with product details
         const populatedCart = await Cart.findById(cart._id)
             .populate('products.productId', 'name description images price quantity');
 
@@ -233,22 +223,18 @@ const validateCart = async (req, res) => {
 
         let errors = [];
 
-        // Validate each product in the cart
         for (const cartItem of cart.products) {
             const product = cartItem.productId;
 
-            // Check if product still exists
             if (!product) {
                 errors.push(`Product no longer available`);
                 continue;
             }
 
-            // Check quantity limits
             if (cartItem.quantity > 15) {
                 errors.push(`${product.name}: Maximum limit is 15 items per product`);
             }
 
-            // Check stock availability
             if (product.quantity < cartItem.quantity) {
                 errors.push(`${product.name}: Only ${product.quantity} items available`);
             }

@@ -108,10 +108,19 @@ const getAllOrders = async (req, res) => {
           _id: item._id,
           quantity: item.quantity,
           price: item.price,
+          originalPrice:item.originalPrice,
+          couponDiscount:item.couponDiscount,
+          discountType:item.discountType,
+          discountAmount:item.discountAmount,
+          appliedDiscount:item.appliedDiscount, 
+          requestStatus:item.returnReq.requestStatus,
+          explanation:item.returnReq.explanation,
+          reason:item.returnReq.reason,
           productName: item.product?.name,
           productImage: item.product?.images,
           productDescription: item.product?.description,
           product: item.product,
+          
         })),
       })),
       totalOrders,
@@ -126,5 +135,50 @@ const getAllOrders = async (req, res) => {
     });
   }
 };
+const updateReturnResponse = async (req, res) => {
+  try {
+    const { orderId, productId, status } = req.body;
+    
+    const productIdToCompare = typeof productId === 'object' ? productId._id : productId;
+    
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
 
-module.exports = { updateOrderStatus, getAllOrders, getAllUsers };
+    const productIndex = order.products.findIndex(
+      (item) => item.product.toString() === productIdToCompare.toString()
+    );
+    
+    console.log('Comparing:', {
+      orderProductId: order.products[0].product.toString(),
+      requestedProductId: productIdToCompare
+    });
+
+    if (productIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found in order"
+      });
+    }
+
+    order.products[productIndex].returnReq = {
+      ...order.products[productIndex].returnReq,
+      requestStatus: status
+    };
+
+    await order.save();
+    return res.status(200).json({
+      success: true,
+      message: `Return request ${status.toLowerCase()}`,
+      order
+    });
+  } catch (error) {
+    console.error("Error updating return request:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update return request status"
+    });
+  }
+};
+module.exports = { updateOrderStatus, getAllOrders, getAllUsers,updateReturnResponse };
