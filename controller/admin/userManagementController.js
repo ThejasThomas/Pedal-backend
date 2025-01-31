@@ -5,8 +5,20 @@ const jwt =require('jsonwebtoken')
 require('dotenv').config();
 const getUserData = async(req, res) => {
     try {
-      const users = await User.find({ isAdmin: false });
-      res.json(users);
+      const {page=1,limit =10} =req.query;
+      const skip =(page -1)*limit;
+
+      const users = await User.find({ isAdmin: false })
+      .skip(skip)
+      .limit(Number(limit));
+
+      const totalUsers = await User.countDocuments({ isAdmin: false });
+
+
+      res.json({users,
+        totalUsers,
+        totalPages: Math.ceil(totalUsers / limit),
+      });
     } catch (err) {
       console.log(err);
       res.status(500).json({ message: 'Failed to fetch users' });

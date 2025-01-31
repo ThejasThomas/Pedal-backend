@@ -3,12 +3,17 @@ const Product = require('../../model/productModel');
 
 
 const fetchproducts =async(req,res)=>{
+  const {page =1, limit =10,}= req.query;
   console.log('products');
   
   try{
      const products = await Product.find()
+     .skip((page-1)*limit)
+     .limit(limit)
 
-     if(!products){
+     const totalProducts = await Product.countDocuments();
+
+     if(!products||products.length === 0){
       return res
       .status(404)
       .json({
@@ -19,7 +24,9 @@ const fetchproducts =async(req,res)=>{
      return res
      .status(200)
      .json({
-      success:true,message:"products fetched",products
+      success:true,message:"products fetched",products,
+      totalProducts,
+      totalPages:Math.ceil(totalProducts / limit),
      })
   }catch(err){
     console.log(err);
