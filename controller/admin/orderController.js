@@ -1,19 +1,25 @@
 const express = require("express");
 const Order = require("../../model/orderModel");
 const User = require("../../model/userModel");
-
+const Wallet=require('../../model/walletModel')
 const updateOrderStatus = async (req, res) => {
   try {
+    
+    
     const { orderId } = req.params;
     const { status } = req.body;
+    console.log('orderid',req.params);
+    console.log('status',req.body);
+    
+    
 
-    const validStatuses = ["PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"];
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid order status",
-      });
-    }
+    // const validStatuses = ["PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"];
+    // if (!validStatuses.includes(status)) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Invalid order status",
+    //   });
+    // }
 
     const order = await Order.findByIdAndUpdate(
       orderId,
@@ -168,16 +174,39 @@ const updateReturnResponse = async (req, res) => {
     };
 
     await order.save();
+
+     if (status === "Accepted") {
+      const userId = order.user;
+      const productPaidAmount = order.products[productIndex].productPaidAmount;
+
+      let wallet = await Wallet.findOne({ user: userId });
+      if (!wallet) {
+        wallet = new Wallet({ user: userId, balance: 0, transactions: [] });
+      }
+
+      wallet.balance += productPaidAmount;
+
+      wallet.transactions.push({
+        orderId: order._id,
+        transactionType: "credit",
+        transactionDate: new Date(),
+        transactionStatus: "completed",
+        amount: productPaidAmount,
+      });
+
+      await wallet.save();
+    }
+
     return res.status(200).json({
       success: true,
       message: `Return request ${status.toLowerCase()}`,
-      order
+      order,
     });
   } catch (error) {
     console.error("Error updating return request:", error);
     return res.status(500).json({
       success: false,
-      message: "Failed to update return request status"
+      message: "Failed to update return request status",
     });
   }
 };

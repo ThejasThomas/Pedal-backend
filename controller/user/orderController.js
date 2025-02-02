@@ -1,6 +1,7 @@
 const Order = require("../../model/orderModel");
 const Cart = require("../../model/cartModel");
 const Product = require("../../model/productModel");
+const Wallet=require('../../model/walletModel')
 const User=require('../../model/userModel')
 const Razorpay =require('razorpay')
 const crypto=require('crypto')
@@ -85,6 +86,10 @@ const placeOrderList = async (req, res) => {
         
         const discountAmount = product.discountedAmount || 0;
         const appliedDiscount = product.discountValue || 0;
+        const itemTotal = Number(item.price) * Number(item.quantity);
+        const itemCouponDiscount = couponDiscount ? (couponDiscount / items.length) : 0;
+        const paidAmount = itemTotal - itemCouponDiscount;
+
 
         return {
           product: item.productId,
@@ -97,6 +102,7 @@ const placeOrderList = async (req, res) => {
           couponDiscount: couponDiscount || 0,
           appliedDiscount: product.discountValue,
           discountAmount: product.discountedAmount,
+          productPaidAmount: paidAmount,
           discountType: product.productOffval ? 'Product Offer' : (product.catOfferval ? 'Category Offer' : 'No Offer'),
           productOfferValue: product.productOffval,
           categoryOfferValue: product.catOfferval
@@ -377,6 +383,7 @@ return res.status(200).json({
           price: item.price,
           productName: item.productName,
           productImage: item.productImage,
+          returnStatus:item.returnReq.requestStatus,
           productDescription: item.productDescription,productName: item.product?.name,
           productImage: item.product?.images,
           productDescription: item.product?.description,
@@ -445,19 +452,22 @@ const getUserOrders = async (req, res) => {
     });
   }
 };
+
 const cancelOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
-    console.log('backend orderId',orderId);
-    
-    const order = await Order.findById(orderId);
+    console.log('backend orderId', orderId);
 
+    // Find the order
+    const order = await Order.findById(orderId);
+    
     if (!order) {
       return res.status(404).json({
         success: false,
         message: 'Order not found'
       });
     }
+
     if (['DELIVERED', 'CANCELED'].includes(order.orderStatus)) {
       return res.status(400).json({
         success: false,
@@ -465,15 +475,48 @@ const cancelOrder = async (req, res) => {
       });
     }
 
+    // Calculate total refund amount from all products
+    const refundAmount = order.products.reduce((total, product) => {
+      return total + (product.productPaidAmount || 0);
+    }, 0);
+
+    // Update order status first
     order.orderStatus = 'CANCELED';
     order.cancelledAt = new Date();
     await order.save();
 
+    // Find or create wallet for the user
+    let wallet = await Wallet.findOne({ user: order.user });
+    
+    if (!wallet) {
+      wallet = new Wallet({
+        user: order.user,
+        balance: refundAmount,
+        transactions: []
+      });
+    } else {
+      wallet.balance += refundAmount;
+    }
+
+    // Add refund transaction to wallet
+    wallet.transactions.push({
+      orderId: order._id,
+      transactionType: 'credit',
+      transactionDate: new Date(),
+      transactionStatus: 'completed',
+      amount: refundAmount
+    });
+
+    await wallet.save();
+      
     return res.status(200).json({
       success: true,
-      message: 'Order cancelled successfully',
-      order
+      message: 'Order cancelled and refund processed successfully',
+      order,
+      refundAmount,
+      walletBalance: wallet.balance
     });
+
   } catch (error) {
     console.error('Error cancelling order:', error);
     return res.status(500).json({
@@ -483,6 +526,9 @@ const cancelOrder = async (req, res) => {
     });
   }
 };
+
+
+module.exports = { cancelOrder };
 
 module.exports = {
   placeOrderList,getOrderedProductDetails,getUserOrders,verifyPayment,handleFailedOrder,checkProductAvailability,cancelOrder,returnReqest

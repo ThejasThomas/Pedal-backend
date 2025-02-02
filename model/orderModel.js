@@ -19,6 +19,10 @@ const orderSchema = new mongoose.Schema(
           required: true,
           default: 1,
         },
+        productPaidAmount:{
+          type:Number,
+          required:true
+        },
         price: {
           type: Number,
           required: true,

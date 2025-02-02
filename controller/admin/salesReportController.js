@@ -178,7 +178,7 @@ const getSalesReport = async (req, res) => {
       try {
         const { filterType, startDate, endDate } = req.query;
         
-        const query = {};
+        const query = { orderStatus: { $ne: 'CANCELED' } };
         if (startDate && endDate) {
           query.createdAt = {
             $gte: new Date(startDate),
@@ -200,14 +200,12 @@ const getSalesReport = async (req, res) => {
         res.setHeader('Content-Disposition', 'attachment; filename=SalesReport.pdf');
         doc.pipe(res);
     
-        // Define consistent spacing and positioning
         const pageWidth = 535;
         const margins = {
           left: 30,
           right: 30
         };
     
-        // Column positions with adjusted widths
         const columns = {
           orderId: { x: margins.left, width: 80 },
           customer: { x: margins.left + 85, width: 120 },
@@ -217,7 +215,6 @@ const getSalesReport = async (req, res) => {
           status: { x: margins.left + 465, width: 70 }
         };
     
-        // Header
         doc.font('Helvetica-Bold')
            .fontSize(16)
            .text('Sales Report', margins.left, 30, {
@@ -227,15 +224,12 @@ const getSalesReport = async (req, res) => {
     
         let y = 60;
     
-        // Table headers
         doc.font('Helvetica-Bold')
            .fontSize(9);
     
-        // Draw header background
         doc.rect(margins.left, y, pageWidth, 15)
            .fill('#f3f4f6');
     
-        // Draw header texts
         doc.fillColor('#000000')
            .text('Order ID', columns.orderId.x, y + 3)
            .text('Customer', columns.customer.x, y + 3)
@@ -249,11 +243,9 @@ const getSalesReport = async (req, res) => {
         let totalSales = 0;
         let totalDiscounts = 0;
     
-        // Reduce font sizes and line spacing for content
         doc.font('Helvetica')
            .fontSize(8);
     
-        // Table content
         orders.forEach((order, index) => {
           const orderDiscounts = order.products.reduce((sum, product) => {
             return sum + (product.discountAmount || 0) + (product.couponDiscount || 0);
@@ -262,7 +254,6 @@ const getSalesReport = async (req, res) => {
           totalDiscounts += orderDiscounts;
           totalSales += order.totalAmount;
     
-          // Order details - main row
           doc.text(order._id.toString().slice(-6), columns.orderId.x, y)
              .text(order.user.email, columns.customer.x, y, { width: columns.customer.width, ellipsis: true })
              .text(order.createdAt.toLocaleDateString(), columns.date.x, y)
@@ -272,7 +263,6 @@ const getSalesReport = async (req, res) => {
     
           y += 12;
     
-          // Product details with compact layout
           order.products.forEach(product => {
             doc.text(`• ${product.productName} (${product.quantity}x Rs.${product.price})`,
               columns.orderId.x + 5, y, {
@@ -295,7 +285,6 @@ const getSalesReport = async (req, res) => {
             }
           });
     
-          // Add a thin separator line
           doc.strokeColor('#e5e7eb')
              .moveTo(margins.left, y)
              .lineTo(pageWidth + margins.left, y)
@@ -304,7 +293,6 @@ const getSalesReport = async (req, res) => {
           y += 8;
         });
     
-        // Summary section with reduced spacing
         y += 5;
         doc.font('Helvetica-Bold')
            .fontSize(10)
@@ -312,7 +300,6 @@ const getSalesReport = async (req, res) => {
     
         y += 15;
     
-        // Summary details
         doc.fontSize(9);
         const summaryX = pageWidth - 200;
         const valueX = pageWidth - 50;
@@ -340,7 +327,7 @@ const getSalesReport = async (req, res) => {
       try {
         const { filterType, startDate, endDate } = req.query;
         
-        const query = {};
+        const query = { orderStatus: { $ne: 'CANCELED' } };
         if (startDate && endDate) {
           query.createdAt = {
             $gte: new Date(startDate),

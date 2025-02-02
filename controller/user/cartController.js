@@ -330,6 +330,8 @@ const getCartDetails = async (req, res) => {
                 }
             });
         }
+        console.log(cart.products);
+        
         const cartDetails = {
             userId: cart.userId,
             products: cart.products.map(item => ({
@@ -344,6 +346,7 @@ const getCartDetails = async (req, res) => {
                 totalPrice: item.totalPrice,
             })),
             cartTotal: cart.cartTotal
+
         };
 
         res.status(200).json({

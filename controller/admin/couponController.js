@@ -24,7 +24,7 @@ const addCoupon=async (req,res)=>{
             minPurchaseAmount:min_purchase_amount,
             maxDiscountAmount: max_discount_amount,
             expirationDate: expiration_date,
-            usageLimit:usage_limit,
+            // usageLimit:usage_limit,
            })
            await data.save()
 
@@ -42,7 +42,7 @@ const addCoupon=async (req,res)=>{
     const fetchCoupons= async (req,res)=>{
         try{
             const coupons=await Coupon.find({})
-            if (!coupons || coupons.length === 0) {
+            if (!coupons ) {
                 return res.status(404).json({ message: "No coupons found" });
             }
             return res.status(200).json({message:"Coupons fetched successfully",Coupons:coupons})

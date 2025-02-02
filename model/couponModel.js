@@ -27,15 +27,15 @@ const coupon_schema =new mongoose.Schema({
         type:Date,
         required:true
     },
-    maxUsageLimit:{
-        type:Number,
-        default:1,
-        min: [1, "Usage limit must be at least 1 if specified"],
-    },
-    currentUsageLimit:{
-        type:Number,
-        default:0,
-    }
+    // usageLimit:{
+    //     type:Number,
+    //     default:1,
+    //     min: [1, "Usage limit must be at least 1 if specified"],
+    // },
+    // currentUsageLimit:{
+    //     type:Number,
+    //     default:0,
+    // }
 })
 
 module.exports =mongoose.model('coupon',coupon_schema)

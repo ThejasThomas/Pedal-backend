@@ -8,14 +8,12 @@ const fetchProductsForUser = async (req, res) => {
     const search = req.query.search || '';
     const category = req.query.category;
 
-    let query = {};
+    let query = {status: 'Published'};
 
-    // Add search condition if search query exists
     if (search) {
-      query.name = { $regex: search, $options: 'i' }; // case-insensitive search
+      query.name = { $regex: search, $options: 'i' }; 
     }
 
-    // Add category condition if category exists
     if (category) {
       query.category = category;
     }

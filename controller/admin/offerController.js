@@ -2,6 +2,7 @@ const Offer = require('../../model/offerModel');
 const Product = require('../../model/productModel');
 const Category=require('../../model/categoryModel')
 const mongoose = require('mongoose');
+// const { default: products } = require('razorpay/dist/types/products');
 
 const addProductOffer = async (req, res) => {
     try {
@@ -14,7 +15,6 @@ const addProductOffer = async (req, res) => {
             });
         }
 
-        // Validate offer value is a number between 0 and 100
         if (isNaN(offerValue) || offerValue < 0 || offerValue > 100) {
             return res.status(400).json({
                 success: false,
@@ -64,10 +64,8 @@ const addProductOffer = async (req, res) => {
             endDate: offerExpairyDate
         });
 
-        // Save the offer
         await newOffer.save();
 
-        // Update product with offer reference
         product.currentOffer = newOffer._id;
         await product.save();
 
@@ -117,8 +115,14 @@ const getProductOffers = async (req, res) => {
             })
         }
 
-        await Product.updateMany({_id:removedOffer.targetId},{$unset:{productOffval:"",offer: "",
-        }})
+       let productss = await Product.find({_id:removedOffer.targetId})
+
+        await Promise.all(productss.map(async(products)=>{
+            products.productOffval = null;
+            return products.save()
+        }))
+        
+        
         res.status(200).json({
             success: true,
             message: "Offer deleted successfully",
@@ -248,8 +252,8 @@ const getAllCategoryOffers = async (req, res) => {
   const removeCategoryOffer = async (req, res) => {
     try {
         const { offerId } = req.params
-    
-        // Find and remove the offer
+        console.log(offerId);
+        
         const removedOffer = await Offer.findByIdAndDelete(offerId)
     
         if (!removedOffer) {
@@ -259,8 +263,15 @@ const getAllCategoryOffers = async (req, res) => {
           })
         }
     
-        // Update all products in this category to remove the offer
-        await Product.updateMany({ category: removedOffer.targetId }, { $unset: { catOfferval: "" } })
+       let products= await Product.find({ category: removedOffer.targetId })
+       console.log('hlo',products);
+       
+       await Promise.all(products.map(async (product) => {
+        product.catOfferval = null;
+        // Recalculate currentPrice if needed
+        // product.currentPrice = calculateFinalPrice(product);
+        return product.save();
+    }));
     
         res.status(200).json({
           success: true,
