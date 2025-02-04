@@ -12,7 +12,7 @@ const {userAddress,fetchUserAddress,deleteUserAddress } =require('../controller/
 const { fetchproducts } = require("../controller/admin/productController");
 const  verifyUser  = require("../Middleware/userAuth");
 const {addToCart,updateCart,validateCart,clearCart,getCartDetails,removeFromCart} =require('../controller/user/cartController')
-const {placeOrderList,getOrderedProductDetails,getUserOrders,cancelOrder, verifyPayment, handleFailedOrder, checkProductAvailability, returnReqest } =require('../controller/user/orderController')
+const {placeOrderList,getOrderedProductDetails,getUserOrders,cancelOrder, verifyPayment, handleFailedOrder, checkProductAvailability, returnReqest, retryPayment } =require('../controller/user/orderController')
 const {forgotPassword, verifyForgotPasswordOtp, resetPassword} =require('../controller/user/forgotPasswordController');
 const { addCoupon } = require("../controller/admin/couponController");
 const { fetchCouponDetails } = require("../controller/user/couponUserController");
@@ -51,5 +51,6 @@ userRoute.post('/addToWishlist',addToWishlist)
 userRoute.get('/getwishlistproducts',getWishlist)
 userRoute.post('/wishlistremoveproducts',removeFromWishlist)
 userRoute.post('/requestReturn',returnReqest)
+userRoute.post('/retrypayment',retryPayment)
 module.exports = userRoute;
 

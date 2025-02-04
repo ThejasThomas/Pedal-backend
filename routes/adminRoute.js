@@ -25,6 +25,7 @@ const { getAllOrders,updateOrderStatus,getAllUsers,getOrderDetails, updateReturn
 const { addCoupon, fetchCoupons, deleteCoupon } = require("../controller/admin/couponController");
 const { addProductOffer, getOffer, createCategoryOffer, getAllCategoryOffers, removeCategoryOffer, getProductOffers, removeProductOffer } = require("../controller/admin/offerController");
 const { getSalesReport, downloadController } = require("../controller/admin/salesReportController");
+const { fetchDashBoardData } = require("../controller/admin/adminDashboardController");
 
 adminRoute.post("/login", adminLogin);
 adminRoute.post("/addproduct", addProduct);
@@ -57,4 +58,5 @@ adminRoute.get('/fetchsalesreport',getSalesReport)
 adminRoute.get('/sales/download/pdf',downloadController.downloadPdf)
 adminRoute.get('/sales/download/excel',downloadController.downloadExcel)
 adminRoute.put('/returnrespond',updateReturnResponse)
+adminRoute.get('/fetchDashboard',fetchDashBoardData)
 module.exports = adminRoute;

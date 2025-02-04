@@ -26,8 +26,9 @@ const productSchema = new mongoose.Schema({
   //  ref: 'Category',
   // },
   category: {
-    type: String,
-    required: true,  // Make it required if needed
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category',
+    required: true,
   },
    discountedAmount:{
        type:Number,

@@ -4,7 +4,6 @@ const Product=require('../../model/productModel')
 const addToCart = async (req, res) => {
     try {
         const { userId, productId, quantity, price } = req.body;
-        console.log(req.body);
         
         // Basic validation
         if (!userId || !productId || !quantity || !price) {
@@ -303,7 +302,6 @@ const clearCart = async (req, res) => {
 const getCartDetails = async (req, res) => {
     try {
         const { userId } = req.params;
-        console.log('userrr id',userId);
         
 
         if (!userId) {
@@ -330,7 +328,6 @@ const getCartDetails = async (req, res) => {
                 }
             });
         }
-        console.log(cart.products);
         
         const cartDetails = {
             userId: cart.userId,

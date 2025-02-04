@@ -4,7 +4,8 @@ const Product = require("../../model/productModel");
 const Wallet=require('../../model/walletModel')
 const User=require('../../model/userModel')
 const Razorpay =require('razorpay')
-const crypto=require('crypto')
+const crypto=require('crypto');
+// const { default: products } = require("razorpay/dist/types/products");
 require('dotenv').config();
 
 
@@ -15,8 +16,8 @@ if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
 
 const placeOrderList = async (req, res) => {
   try {
-    const { userId,images, addressId, paymentMethod, items, totalAmount,couponDiscount } = req.body;
-    console.log(req.body);
+    const { userId,images, addressId, paymentMethod, items, totalAmount,couponDiscount,paymentStatus,orderStatus } = req.body;
+    // console.log('lloooo',req.body);
     if (!userId) {
       return res.status(400).json({
         success: false,
@@ -37,9 +38,17 @@ const placeOrderList = async (req, res) => {
         message: "Payment method is required",
       });
     }
-    console.log('paymnt',paymentMethod);
+    if(paymentMethod=='CashOnDelivery'){
+      if(totalAmount<1000){
+        return res.status(400).json({
+          success:false,
+          message:"Payment Above 1000 not allowed for CashOnDelivery"
+        })
+      }
+    }
+    // console.log('paymnt',paymentMethod);
     
-    console.log('img',images);
+    // console.log('img',images);
     
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({
@@ -105,13 +114,36 @@ const placeOrderList = async (req, res) => {
           productPaidAmount: paidAmount,
           discountType: product.productOffval ? 'Product Offer' : (product.catOfferval ? 'Category Offer' : 'No Offer'),
           productOfferValue: product.productOffval,
-          categoryOfferValue: product.catOfferval
+          categoryOfferValue: product.catOfferval,
+          paymentStatus: paymentStatus || 'Pending',
+          // paymentDetails: paymentDetails || null
         };
       })
 
     );
 
     let razorpayOrder = null;
+    let finalOrderStatus = orderStatus || 
+    (paymentMethod === 'UPI' ? 'PENDING' : 
+     (paymentStatus === 'Paid' ? 'ON THE ROAD' : 
+      (paymentStatus === 'Failed' ? 'ON THE ROAD' : 'PENDING')));
+
+      if (paymentStatus === 'Failed') {
+        // Check existing orders with failed status for this user
+        const failedOrders = await Order.countDocuments({ 
+          user: userId, 
+          paymentStatus: 'Failed' 
+        });
+      }
+      if (paymentMethod === 'UPI') {
+        razorpayOrder = await razorpay.orders.create({
+          amount: Math.round(totalAmount * 100),
+          currency: 'INR',
+          receipt: `order_${Date.now()}`,
+          payment_capture: 1
+        });
+      }
+   
 
     const orderData = {
       user: userId,
@@ -140,20 +172,26 @@ const placeOrderList = async (req, res) => {
       user: userId,
       products: orderProducts,
       totalAmount,
-      originalTotalAmount: orderProducts.reduce((sum, item) => sum + (item.originalPrice * item.quantity), 0),
-      totalDiscountAmount: orderProducts.reduce((sum, item) => sum + (item.discountAmount * item.quantity), 0),
+      originalTotalAmount: orderProducts.reduce((sum, item) => 
+        sum + (item.originalPrice * item.quantity), 0),
+      totalDiscountAmount: orderProducts.reduce((sum, item) => 
+        sum + ((item.discountAmount || 0) * item.quantity), 0),
       paymentMethod,
       couponDiscount,
       shippingAddress: addressId,
-      orderStatus:paymentMethod === 'UPI' ? 'PENDING' : 'ON THE ROAD',
-      razorpayOrderId: razorpayOrder?.id
-
+      orderStatus: finalOrderStatus,
+      paymentStatus: paymentStatus || 'Pending',
+      // paymentDetails: paymentDetails || null,
+      razorpayOrderId: razorpayOrder?.id,
+      // paymentFailureCount: paymentStatus === 'Failed' ? (failureCount + 1) : 0
     });
-    console.log('neworder',newOrder);
-    
 
     await newOrder.save();
-    await Cart.findOneAndUpdate({ user: userId }, { $set: { products: [] } });
+
+    // Only clear cart for successful orders
+    if (paymentStatus === 'Paid') {
+      await Cart.findOneAndUpdate({ user: userId }, { $set: { products: [] } });
+    }
 
     const populatedOrder = await Order.findById(newOrder._id)
       .populate("user", "firstName email")
@@ -161,7 +199,8 @@ const placeOrderList = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Order placed successfully",
+      message: paymentStatus === 'Failed' ? 
+        "Order saved with payment failure" : "Order placed successfully",
       order: populatedOrder,
       razorpayOrder: razorpayOrder ? {
         id: razorpayOrder.id,
@@ -170,18 +209,18 @@ const placeOrderList = async (req, res) => {
       } : null
     });
   } catch (error) {
-    console.error("Order placement error:", error);
+    // console.error("Order placement error:", error);
     return res.status(500).json({
       success: false,
       message: error.message || "Failed to place order",
     });
   }
-}
+};
 
 const returnReqest = async (req, res) => {
   try {
     const { reason, explanation, orderId, itemId } = req.body;
-    console.log(req.body);
+    // console.log(req.body);
     if (!reason || !explanation || !orderId || !itemId) {
       return res.status(400).json({ message: "All fields are required" });
     }
@@ -189,10 +228,10 @@ const returnReqest = async (req, res) => {
     if (!orderData) {
       return res.status(404).json({ message: "Order not found" });
     }
-    console.log('rfvtv',orderData);
+    // console.log('rfvtv',orderData);
     
     const returnItem = orderData.products.find((item) => item._id.toString() === itemId)
-    console.log("jij8j9iji9m",returnItem);
+    // console.log("jij8j9iji9m",returnItem);
     if (!returnItem) {
       return res.status(404).json({ message: "Item not found in order" });
     }
@@ -205,13 +244,13 @@ const returnReqest = async (req, res) => {
     returnItem.returnReq.requestStatus = "Pending";
    
         
-console.log("saving")
+// console.log("saving")
     await orderData.save()
 
     return res.status(200).json({ message: "Return request registered successfully" })
 
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     return res.status(500).json({ message: "An error occurred while processing the return request" });
   }
 };
@@ -264,7 +303,7 @@ const checkProductAvailability = async (req, res) => {
       });
       
   } catch (error) {
-      console.error('Product availability check error:', error);
+      // console.error('Product availability check error:', error);
       res.status(500).json({
           success: false,
           message: "Error checking product availability",
@@ -306,7 +345,7 @@ const verifyPayment = async (req, res) => {
 
     res.json({ success: true, message: "Payment verified successfully" })
   } catch (error) {
-    console.error("Payment verification error:", error)
+    // console.error("Payment verification error:", error)
     res.status(500).json({ success: false, message: "Internal server error" })
   }
 }
@@ -330,7 +369,7 @@ const handleFailedOrder = async (req, res) => {
 
     res.json({ success: true, message: "Order status updated" })
   } catch (error) {
-    console.error("Failed order handling error:", error)
+    // console.error("Failed order handling error:", error)
     res.status(500).json({ success: false, message: "Internal server error" })
   }
 }
@@ -356,7 +395,7 @@ const getOrderedProductDetails = async (req, res) => {
         select: 'name images description price',
       })
       .populate('shippingAddress')
-      console.log('order status',order.orderStatus);
+      // console.log('order status',order.orderStatus);
       
     
     if (!order) {
@@ -393,7 +432,7 @@ return res.status(200).json({
     });
 
   } catch (error) {
-    console.error("Error fetching order:", error);
+    // console.error("Error fetching order:", error);
     return res.status(500).json({
       success: false,
       message: error.message || "Failed to fetch order details"
@@ -419,7 +458,7 @@ const getUserOrders = async (req, res) => {
     })
     .populate('shippingAddress') 
     .sort({ createdAt: -1 });
-  console.log(JSON.stringify(orders, null, 2));
+  // console.log(JSON.stringify(orders, null, 2));
   
 
     return res.status(200).json({
@@ -439,13 +478,14 @@ const getUserOrders = async (req, res) => {
           productName: item.product?.name,
           productImage: item.product?.images,
           productDescription: item.product?.description,
+          paymentStatus:item.paymentStatus,
           product: item.product
         }))
       }))
     });
 
   } catch (error) {
-    console.error("Error fetching user orders:", error);
+    // console.error("Error fetching user orders:", error);
     return res.status(500).json({
       success: false,
       message: error.message || "Failed to fetch user orders"
@@ -456,7 +496,7 @@ const getUserOrders = async (req, res) => {
 const cancelOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
-    console.log('backend orderId', orderId);
+    // console.log('backend orderId', orderId);
 
     // Find the order
     const order = await Order.findById(orderId);
@@ -518,7 +558,7 @@ const cancelOrder = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error cancelling order:', error);
+    // console.error('Error cancelling order:', error);
     return res.status(500).json({
       success: false,
       message: 'Failed to cancel order',
@@ -526,10 +566,36 @@ const cancelOrder = async (req, res) => {
     });
   }
 };
+async function  retryPayment(req,res) {
+  try{
+    const {orderId} = req.body
+    console.log('orderrr',orderId);
+    
+
+    const orderData = await Order.findById(orderId)
+
+    if(!orderData){
+      return res
+      .status(404)
+      .json({
+          message: "Order not found"
+      })
+    }
+
+    orderData.products.forEach((item)=>{
+      item.paymentStatus = "Paid"
+    })
+    await orderData.save()
+
+    res.status(200).json({ message: "Payment Successfull" });
+  }catch(err){
+    console.log(err)
+  }
+}
 
 
-module.exports = { cancelOrder };
+// module.exports = { cancelOrder };
 
 module.exports = {
-  placeOrderList,getOrderedProductDetails,getUserOrders,verifyPayment,handleFailedOrder,checkProductAvailability,cancelOrder,returnReqest
+  placeOrderList,getOrderedProductDetails,getUserOrders,verifyPayment,handleFailedOrder,checkProductAvailability,cancelOrder,returnReqest,retryPayment
 };
