@@ -5,7 +5,6 @@ const Wallet=require('../../model/walletModel')
 const User=require('../../model/userModel')
 const Razorpay =require('razorpay')
 const crypto=require('crypto');
-// const { default: products } = require("razorpay/dist/types/products");
 require('dotenv').config();
 
 
@@ -125,7 +124,6 @@ const placeOrderList = async (req, res) => {
       (paymentStatus === 'Failed' ? 'ON THE ROAD' : 'PENDING')));
 
       if (paymentStatus === 'Failed') {
-        // Check existing orders with failed status for this user
         const failedOrders = await Order.countDocuments({ 
           user: userId, 
           paymentStatus: 'Failed' 
@@ -184,7 +182,6 @@ const placeOrderList = async (req, res) => {
 
     await newOrder.save();
 
-    // Only clear cart for successful orders
     if (paymentStatus === 'Paid') {
       await Cart.findOneAndUpdate({ user: userId }, { $set: { products: [] } });
     }

@@ -85,7 +85,7 @@ const signup = async (req, res) => {
 const updateUserData=async(req,res)=>{
   try{
     const { userId } =req.params;
-    console.log(userId);
+    console.log('id',userId);
     
     const updateData=req.body;
     if(!userId){
@@ -111,6 +111,7 @@ const updateUserData=async(req,res)=>{
       return res.status(500).json({message:'Failed to updateUser details'})
     }
     res.status(200).json({
+      success: true,
       message:'UserData updated successfully',
       user:updatedUserData
     })
@@ -210,17 +211,37 @@ const login = async (req, res) => {
         message: "Email and password are required.",
       });
     }
-
+    
+      // console.log(message);
+      
     const userData = await User.findOne({ email: email });
     if (!userData) {
+      console.log('User not found',email);
+      
       return res.status(404).json({
         success: false,
         message: "Email is not registered, Please Signup",
       });
     }
+    if (userData.isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: "Not access to login",
+      });
+    }
+
+    
+
+
     
     if (userData.isBlocked) {
       return res.status(403).json({ message: 'Account is blocked. Please contact support.' });
+    }
+    if (!password || !userData.password) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid login request. Password is missing.",
+      });
     }
 
     const matchPass = await bcrypt.compare(password, userData.password);
