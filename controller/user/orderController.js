@@ -17,7 +17,6 @@ if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
 const placeOrderList = async (req, res) => {
   try {
     const { userId,images, addressId, paymentMethod, items, totalAmount,couponDiscount,paymentStatus,orderStatus } = req.body;
-    // console.log('lloooo',req.body);
     if (!userId) {
       return res.status(400).json({
         success: false,
@@ -45,10 +44,7 @@ const placeOrderList = async (req, res) => {
           message:"Payment Above 1000 not allowed for CashOnDelivery"
         })
       }
-    }
-    // console.log('paymnt',paymentMethod);
-    
-    // console.log('img',images);
+    }    
     
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({
