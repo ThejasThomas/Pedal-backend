@@ -80,9 +80,14 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    deliveryCharge: {
+      type: Number,
+      default: 0,
+      required: true
+    },
     paymentMethod: {
       type: String,
-      enum: ["CashOnDelivery", "UPI", "Razorpay"],
+      enum: ["CashOnDelivery", "Wallet", "Razorpay"],
       required: true,
     },
     orderStatus: {

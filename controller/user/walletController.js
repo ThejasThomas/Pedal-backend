@@ -1,5 +1,6 @@
 const Wallet = require('../../model/walletModel');
 const User = require('../../model/userModel');
+const mongoose=require('mongoose')
 
 const getWalletDetails = async (req, res) => {
   try {
@@ -16,6 +17,82 @@ const getWalletDetails = async (req, res) => {
     res.status(500).json({ message: 'Error fetching wallet details', error: error.message });
   }
 };
+const getWalletBalance= async (req, res) => {
+  
+  try {
+    const { userId } = req.params;
+    console.log('userr',userId);
+    console.log('helooo')
+    
+    
+    let wallet = await Wallet.findOne({ user: userId });
+    console.log('baalance',wallet);
+    
+    
+    if (!wallet) {
+      wallet = await Wallet.create({
+        user: userId,
+        balance: 0,
+        transactions: []
+      });
+    }
+
+    res.json({
+      success: true,
+      wallet
+    });
+  } catch (error) {
+    console.log(error);
+    
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+}
+
+const processWalletPayment= async (req, res) => {
+    // const session = await mongoose.startSession();
+    // session.startTransaction();
+
+    try {
+      const { userId, amount } = req.body;
+      
+      const wallet = await Wallet.findOne({ user: userId })
+      
+      if (!wallet || wallet.balance < amount) {
+        throw new Error('Insufficient wallet balance');
+      }
+
+      const transaction = {
+        transactionType: 'debit',
+        transactionDate: new Date(),
+        transactionStatus: 'completed',
+        amount: amount
+      };
+
+      wallet.balance -= amount;
+      wallet.transactions.push(transaction);
+      
+      await wallet.save()
+
+      // await session.commitTransaction();
+      
+      res.json({
+        success: true,
+        transactionId: transaction._id,
+        message: 'Payment processed successfully'
+      });
+    } catch (error) {
+      // await session.abortTransaction();
+      res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    } finally {
+      // session.endSession();
+    }
+  }
 
 const addFunds = async (req, res) => {
   try {
@@ -108,4 +185,4 @@ exports.deductAmount = async (userId, amount, orderId) => {
   }
 };
 
-module.exports ={addFunds,getTransactionHistory,getWalletDetails}
+module.exports ={addFunds,getTransactionHistory,getWalletDetails,getWalletBalance,processWalletPayment}
