@@ -436,6 +436,7 @@ return res.status(200).json({
 const getUserOrders = async (req, res) => {
   try {
     const { userId } = req.params;
+    const { page = 1, limit = 4 } = req.query; // Default to page 1 and limit 4
 
     if (!userId) {
       return res.status(400).json({
@@ -444,15 +445,23 @@ const getUserOrders = async (req, res) => {
       });
     }
 
+    // Calculate the skip and limit for pagination
+    const skip = (page - 1) * limit;
+
     const orders = await Order.find({ user: userId })
-    .populate('user', 'firstName email')
-    .populate({
-      path: 'products.product', 
-      select: 'name images description price',
-    })
-    .populate('shippingAddress') 
-    .sort({ createdAt: -1 });
-  
+      .populate('user', 'firstName email')
+      .populate({
+        path: 'products.product', 
+        select: 'name images description price',
+      })
+      .populate('shippingAddress') 
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const totalOrders = await Order.countDocuments({ user: userId });
+
+    const totalPages = Math.ceil(totalOrders / limit);
 
     return res.status(200).json({
       success: true,
@@ -471,20 +480,22 @@ const getUserOrders = async (req, res) => {
           productName: item.product?.name,
           productImage: item.product?.images,
           productDescription: item.product?.description,
-          paymentStatus:item.paymentStatus,
+          paymentStatus: item.paymentStatus,
           product: item.product
         }))
-      }))
+      })),
+      totalPages,
+      currentPage: page,
     });
 
   } catch (error) {
-    // console.error("Error fetching user orders:", error);
     return res.status(500).json({
       success: false,
       message: error.message || "Failed to fetch user orders"
     });
   }
 };
+
 
 const cancelOrder = async (req, res) => {
   try {

@@ -17,19 +17,18 @@ async function fetchDashBoardData(req, res) {
         switch (timeFilter) {
             case "week": 
                 startDate.setDate(currentDate.getDate() - 7); 
-                startDate.setHours(0, 0, 0, 0);  // Reset to start of day
+                startDate.setHours(0, 0, 0, 0);  
                 break;
             case "month": 
                 startDate.setMonth(currentDate.getMonth() - 1);
-                startDate.setHours(0, 0, 0, 0);  // Reset to start of day
+                startDate.setHours(0, 0, 0, 0);  
                 break;
             case "year": 
                 startDate.setFullYear(currentDate.getFullYear() - 1);
-                startDate.setHours(0, 0, 0, 0);  // Reset to start of day
+                startDate.setHours(0, 0, 0, 0); 
                 break;
         }
 
-        // Total Users and Registration
         const TotalCustomers=await User.countDocuments();
  
         console.log('Date range:', {
@@ -39,7 +38,6 @@ async function fetchDashBoardData(req, res) {
       });
       
 
-        // Categories Aggregation
         const categoriesAggregation = await Category.aggregate([
             { $group: {
                 _id: null,
@@ -48,7 +46,6 @@ async function fetchDashBoardData(req, res) {
             }}
         ]);
 
-        // Sales Chart Data
         const salesChartData = await Order.aggregate([
             { $match: { 
                 createdAt: { $gte: startDate, $lte: currentDate },
@@ -79,7 +76,6 @@ async function fetchDashBoardData(req, res) {
     console.log('Matching orders:', orders.length);
         
 
-        // Total Sales Aggregation
         const totalSalesAggregation = await Order.aggregate([
             { $match: { orderStatus: "DELIVERED" } },
             { $group: {
@@ -111,7 +107,6 @@ async function fetchDashBoardData(req, res) {
       ]);
       
 
-        // Best Selling Categories with Details
         const bestCategories = await Order.aggregate([
           { $unwind: "$products" },
           { $match: { orderStatus: "DELIVERED" } },
@@ -143,7 +138,6 @@ async function fetchDashBoardData(req, res) {
             success: true,
             message: "Dashboard Data",
             totalCustomers: TotalCustomers,
-            // newCustomers: customerAggregation[0]?.newCustomers || 0,
             totalCategories: categoriesAggregation[0]?.totalCategories || 0,
             activeCategories: categoriesAggregation[0]?.activeCategories || 0,
             totalProducts: await Product.countDocuments(),

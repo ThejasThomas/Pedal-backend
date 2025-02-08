@@ -5,18 +5,37 @@ const mongoose=require('mongoose')
 const getWalletDetails = async (req, res) => {
   try {
     const userId = req.params.userId;
+    const page = parseInt(req.query.page) || 1;
+    const limit = 6;
+    const skip = (page - 1) * limit;
+
     let wallet = await Wallet.findOne({ user: userId }).populate('transactions.orderId');
-    
+
     if (!wallet) {
       wallet = new Wallet({ user: userId, balance: 0, transactions: [] });
       await wallet.save();
     }
 
-    res.json(wallet);
+    let sortedTransactions = wallet.transactions.sort(
+      (a, b) => new Date(b.transactionDate) - new Date(a.transactionDate)
+    );
+
+    const paginatedTransactions = sortedTransactions.slice(skip, skip + limit);
+
+    const totalTransactions = wallet.transactions.length;
+    const totalPages = Math.ceil(totalTransactions / limit);
+
+    res.json({
+      wallet: { ...wallet.toObject(), transactions: paginatedTransactions },
+      totalPages,
+      currentPage: page,
+    });
+
   } catch (error) {
     res.status(500).json({ message: 'Error fetching wallet details', error: error.message });
   }
 };
+
 const getWalletBalance= async (req, res) => {
   
   try {
@@ -90,7 +109,6 @@ const processWalletPayment= async (req, res) => {
         message: error.message
       });
     } finally {
-      // session.endSession();
     }
   }
 
@@ -102,6 +120,9 @@ const addFunds = async (req, res) => {
     if (!amount || amount <= 0) {
       return res.status(400).json({ message: 'Invalid amount' });
     }
+    if(amount>=10000){
+      return res.status(400).json({message:'Only you can add less than 10000 at a time'})
+    }
 
     let wallet = await Wallet.findOne({ user: userId });
 
@@ -110,7 +131,7 @@ const addFunds = async (req, res) => {
 
       wallet = new Wallet({
         user: userId,
-        balance: amount,  // Set initial balance with the given amount
+        balance: amount,
         transactions: [
           {
             transactionType: 'credit',
