@@ -68,12 +68,12 @@ async function fetchDashBoardData(req, res) {
             }},
             { $sort: { name: 1 } }
         ]);
-      console.log('saless', salesChartData);
+    //   console.log('saless', salesChartData);
       const orders = await Order.find({ 
         createdAt: { $gte: startDate, $lte: currentDate },
         orderStatus: "DELIVERED"
     });
-    console.log('Matching orders:', orders.length);
+    // console.log('Matching orders:', orders.length);
         
 
         const totalSalesAggregation = await Order.aggregate([

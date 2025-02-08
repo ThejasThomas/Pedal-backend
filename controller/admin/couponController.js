@@ -60,7 +60,7 @@ const fetchCoupons = async (req, res) => {
 const deleteCoupon = async (req, res) => {
   try {
     const { _id } = req.query;
-    console.log(_id);
+    // console.log(_id);
     const deleted = await Coupon.findByIdAndDelete(_id);
 
     if (deleted) {

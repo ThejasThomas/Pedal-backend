@@ -77,7 +77,7 @@ const getWishlist = async (req, res) => {
                 select: 'name description basePrice images discountValue discountedAmount status quantity'
             });
 
-        console.log('Found wishlist:', wishlist);
+        // console.log('Found wishlist:', wishlist);
 
         if (!wishlist) {
             return res.status(200).json({
@@ -90,16 +90,12 @@ const getWishlist = async (req, res) => {
             });
         }
 
-        // Log total items before filtering
         console.log('Total items before filtering:', wishlist.items.length);
 
-        // Filter and map products
         const availableProducts = wishlist.items
             .filter(item => {
-                // Log the full item for debugging
                 console.log('Processing item:', JSON.stringify(item, null, 2));
 
-                // Check if product exists and is populated
                 if (!item || !item.productId) {
                     console.log('Skipping item - no product:', item);
                     return false;
@@ -107,14 +103,12 @@ const getWishlist = async (req, res) => {
 
                 const product = item.productId;
                 
-                // Log product details for debugging
                 console.log('Product details:', {
                     id: product._id,
                     status: product.status,
                     quantity: product.quantity
                 });
 
-                // Return true for any valid product (removing status and quantity check temporarily)
                 return true;
             })
             .map(item => {
@@ -133,7 +127,6 @@ const getWishlist = async (req, res) => {
                 };
             });
 
-        // Log final results
         console.log('Final available products:', availableProducts.length);
 
         return res.status(200).json({

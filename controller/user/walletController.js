@@ -40,12 +40,12 @@ const getWalletBalance= async (req, res) => {
   
   try {
     const { userId } = req.params;
-    console.log('userr',userId);
-    console.log('helooo')
+    // console.log('userr',userId);
+    // console.log('helooo')
     
     
     let wallet = await Wallet.findOne({ user: userId });
-    console.log('baalance',wallet);
+    // console.log('baalance',wallet);
     
     
     if (!wallet) {
@@ -115,7 +115,7 @@ const processWalletPayment= async (req, res) => {
 const addFunds = async (req, res) => {
   try {
     const { userId, amount } = req.body;
-    console.log('Request Body:', req.body);
+    // console.log('Request Body:', req.body);
     
     if (!amount || amount <= 0) {
       return res.status(400).json({ message: 'Invalid amount' });
@@ -170,7 +170,7 @@ const getTransactionHistory = async (req, res) => {
   try {
     const userId = req.params.userId;
     const wallet = await Wallet.findOne({ user: userId }).populate('transactions.orderId');
-    console.log('idd',userId);
+    // console.log('idd',userId);
     
     if (!wallet) {
       return res.status(404).json({ message: 'Wallet not found' });

@@ -13,7 +13,7 @@ const otpStore = new Map();
 const fetchUserAccountData = async (req, res) => {
   try {
     const { userId } = req.params;
-    console.log(userId);
+    // console.log(userId);
     
                      
     if (!userId) {
@@ -139,14 +139,14 @@ const verifyOtp = async (req, res) => {
     }
 
     const userData = otpRecord.data;
-    console.log("User data from OTP record:", userData);
+    // console.log("User data from OTP record:", userData);
 
     if (!userData) {
       return res.status(400).json({ message: "User data is missing or invalid." });
     }
 
     const user = await User.create(userData);
-    console.log('Created user:', user);
+    // console.log('Created user:', user);
 
     await Otp.deleteMany({ email });
 

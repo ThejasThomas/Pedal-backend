@@ -39,7 +39,7 @@ const fetchCategoryUser = async (req, res) => {
 const addCategory = async (req, res) => {
   try {
     const { name, image, description } = req.body;
-    console.log(req.body);
+    // console.log(req.body);
 
     // Validate required fields
     if (!name || !image || !description) {
@@ -70,7 +70,7 @@ const addCategory = async (req, res) => {
       message: "Category created successfully",
       category: savedCategory,
     });
-    console.log(req.body);
+    // console.log(req.body);
   } catch (error) {
     console.error("Error creating category:", error);
     return res.status(500).json({
@@ -131,7 +131,7 @@ const toggleCategoryListing = async (req, res) => {
 
 const editCategory = async (req, res) => {
   try {
-    console.log("Request body:", req.body);
+    // console.log("Request body:", req.body);
     const { categoryId } = req.params;
 
     if (!categoryId) {
@@ -164,7 +164,7 @@ const editCategory = async (req, res) => {
       }
     }
 
-    console.log("Update data being sent to MongoDB:", updateData);
+    // console.log("Update data being sent to MongoDB:", updateData);
 
     const updatedCategory = await Category.findByIdAndUpdate(
       categoryId,
@@ -175,7 +175,7 @@ const editCategory = async (req, res) => {
       }
     );
 
-    console.log("Updated category:", updatedCategory);
+    // console.log("Updated category:", updatedCategory);
 
     if (!updatedCategory) {
       return res.status(404).json({

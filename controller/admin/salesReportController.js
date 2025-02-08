@@ -8,7 +8,7 @@ const PDFDocument = require('pdfkit');
 const getSalesReport = async (req, res) => {
     try {
       const { filterType, startDate, endDate } = req.query;
-      console.log('heyy',req.query);
+      // console.log('heyy',req.query);
       
       
       let dateFilter = { orderStatus: 'DELIVERED' };

@@ -8,8 +8,8 @@ const updateOrderStatus = async (req, res) => {
     
     const { orderId } = req.params;
     const { status } = req.body;
-    console.log('orderid',req.params);
-    console.log('status',req.body);
+    // console.log('orderid',req.params);
+    // console.log('status',req.body);
     
     
 
@@ -68,7 +68,7 @@ const getAllUsers = async (req, res) => {
         },
       },
     ]);
-    console.log("users", users);
+    // console.log("users", users);
 
     res.status(200).json({
       success: true,

@@ -173,8 +173,8 @@ const getOffer = async (req, res) => {
 const createCategoryOffer = async (req, res) => {
     try {
         const { id, CategoryName, offerName, offerValue, offerExpairyDate } = req.body;
-        console.log('reqqq',req.body);
-        console.log('iddd',id);
+        // console.log('reqqq',req.body);
+        // console.log('iddd',id);
         
         
 
@@ -211,8 +211,8 @@ const createCategoryOffer = async (req, res) => {
 
         await offer.save();
         const products = await Product.find({ category: id });
-      console.log("rrrr",products)
-      console.log("uuuuu",offerValue)
+    //   console.log("rrrr",products)
+    //   console.log("uuuuu",offerValue)
       await Promise.all(products.map(async (product) => {
           product.catOfferval = Number(offerValue);
           await product.save(); 
@@ -232,7 +232,7 @@ const createCategoryOffer = async (req, res) => {
     }
 };
 const getAllCategoryOffers = async (req, res) => {
-    console.log('working offer');
+    // console.log('working offer');
     
     try {
       const offers = await Offer.find({ targetType: "category", endDate: { $gt: new Date() } })

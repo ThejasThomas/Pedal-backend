@@ -8,7 +8,7 @@ const { OAuth2Client } = require("google-auth-library");
 const googleAuth = async (req, res) => {
   try {
     const { token } = req.body;
-    console.log("Processing Google authentication request");
+    // console.log("Processing Google authentication request");
 
     if (!token) {
       return res.status(400).json({

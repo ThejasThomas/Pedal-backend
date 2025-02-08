@@ -5,7 +5,7 @@ const Address =require('../../model/addressModel')
 const userAddress=async(req,res)=>{
     try {
         const {userId}=req.params;
-        console.log('id::',userId);
+        // console.log('id::',userId);
         
         const {
             fullName,
@@ -16,7 +16,7 @@ const userAddress=async(req,res)=>{
             pincode,
             address
         } = req.body;
-        console.log(req.body);
+        // console.log(req.body);
 
         
         
@@ -36,7 +36,7 @@ const userAddress=async(req,res)=>{
             pincode,
             address
         });
-        console.log('new address',newAddress);
+        // console.log('new address',newAddress);
         
        
         return res.status(201).json({
@@ -58,7 +58,7 @@ const fetchUserAddress=async(req,res)=>{
         if (!userId) {
             return res.status(400).json({ message: "User ID is required." });
           }
-        console.log('id:',userId)
+        // console.log('id:',userId)
         const user=await Address.find({user:userId})
         
         if(!user){
@@ -78,7 +78,7 @@ const fetchUserAddress=async(req,res)=>{
 const deleteUserAddress = async (req, res) => {
     try {
         const { addressId } = req.params;
-        console.log('Backend id',addressId);
+        // console.log('Backend id',addressId);
         
 
         // Validate address ID

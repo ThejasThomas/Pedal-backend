@@ -45,7 +45,7 @@ const productSchema = new mongoose.Schema({
   },
   tags: [
     {
-      type: String, // Array of tags
+      type: String, 
     },
   ],
   status: {
@@ -53,25 +53,16 @@ const productSchema = new mongoose.Schema({
     enum: ['Draft', 'Published', 'Archived','Unpublished'],
     default: 'Draft',
   },
-  images: { type: [String], required: true },
-  // rating: {
-  //   type: Number,
-  //   min: 0,
-  //   max: 5,
-  //   default: 0,
-  // },
-  // id: {
-  //   type: String,
-  //   // Will be set to _id when saving
-  // },
- createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-},{
+  images: { type: [String], required: true }
+},
+{
+  timestamps:true,
   toJSON: { virtuals: true },
   toObject: { virtuals: true }
-});
+}
+)
+
+
 productSchema.virtual('currentPrice').get(function() {
   const discountAmount = (this.basePrice * this.discount) / 100;
   return this.basePrice - discountAmount;

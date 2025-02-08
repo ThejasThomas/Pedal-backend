@@ -43,6 +43,7 @@ mongoose.connect("mongodb://127.0.0.1:27017/PedalQuest")
   app.use('/admin',adminRoute)
   app.use('/auth',authRoute)
 
-  app.listen('3000',()=>{
-    console.log('server started')
-  })
+  app.listen(process.env.PORT || 3000, () => {
+    console.log(`Server started on port ${process.env.PORT || 3000}`);
+  });
+  

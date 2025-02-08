@@ -79,7 +79,7 @@ await Otp.create({
   const verifyForgotPasswordOtp = async (req, res) => {
     try {
       const { email, otp } = req.body;
-      console.log('req',req.body);
+      // console.log('req',req.body);
       
   
       if (!email || !otp) {

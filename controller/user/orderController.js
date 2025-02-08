@@ -436,7 +436,7 @@ return res.status(200).json({
 const getUserOrders = async (req, res) => {
   try {
     const { userId } = req.params;
-    const { page = 1, limit = 4 } = req.query; // Default to page 1 and limit 4
+    const { page = 1, limit = 4 } = req.query;
 
     if (!userId) {
       return res.status(400).json({
@@ -574,7 +574,7 @@ const cancelOrder = async (req, res) => {
 async function  retryPayment(req,res) {
   try{
     const {orderId} = req.body
-    console.log('orderrr',orderId);
+    // console.log('orderrr',orderId);
     
 
     const orderData = await Order.findById(orderId)

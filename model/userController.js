@@ -11,7 +11,7 @@ const { error } = require("console");
 const fetchUserAccountData = async (req, res) => {
   try {
     const { userId } = req.params;
-    console.log(userId);
+    // console.log(userId);
     
                      
     if (!userId) {
@@ -83,7 +83,7 @@ const signup = async (req, res) => {
 const updateUserData=async(req,res)=>{
   try{
     const { userId } =req.params;
-    console.log(userId);
+    // console.log(userId);
     
     const updateData=req.body;
     if(!userId){
@@ -123,7 +123,7 @@ const updateUserData=async(req,res)=>{
 const verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
-    console.log("Verifying OTP for email:", email);
+    // console.log("Verifying OTP for email:", email);
 
     if (!email || !otp) {
       return res.status(400).json({ message: "Email and OTP are required." });
@@ -143,7 +143,7 @@ const verifyOtp = async (req, res) => {
     }
 
     const user = await User.create(userData);
-    console.log('Created user:', user);
+    // console.log('Created user:', user);
 
     await Otp.deleteMany({ email });
 
