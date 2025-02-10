@@ -32,10 +32,12 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   next();
 });
-mongoose.connect("mongodb://127.0.0.1:27017/PedalQuest")
-  .then(()=>{
-    console.log(`mongoDB connected succesfully to ${mongoose.connection.name}`);
-  })
+
+mongoose.connect(process.env.MONGO_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+
   .catch(err=>{
     console.error('MongoDB connection error:',err);     
   })
