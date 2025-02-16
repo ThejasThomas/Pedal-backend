@@ -32,7 +32,7 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   next();
 });
-mongoose.connect("mongodb://127.0.0.1:27017/PedalQuest")
+mongoose.connect("mongodb+srv://thejasthomas001:pass@123@cluster0.dsynd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
   .then(()=>{
     console.log(`mongoDB connected succesfully to ${mongoose.connection.name}`);
   })
