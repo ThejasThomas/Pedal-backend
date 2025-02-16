@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express=require('express')
 const mongoose=require('mongoose')
 const bodyParser = require('body-parser');
@@ -11,7 +12,7 @@ const adminRoute=require('./routes/adminRoute');
 const authRoute = require('./routes/authRoute');
 
 app.use(cookieParser())
-dotenv.config();
+// dotenv.config();
 app.use(express.json())
 const corsOPtions = {
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
@@ -20,6 +21,7 @@ const corsOPtions = {
   allowedHeaders: ['Content-Type', 'Authorization'],
   exposedHeaders: ['Set-cookie']
 };
+
 
 app.use(cors(corsOPtions))
 app.use(express.json())
@@ -32,13 +34,18 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   next();
 });
-mongoose.connect("mongodb+srv://thejasthomas001:pass@123@cluster0.dsynd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0/pedal")
-  .then(()=>{
-    console.log(`mongoDB connected succesfully to ${mongoose.connection.name}`);
-  })
-  .catch(err=>{
-    console.error('MongoDB connection error:',err);     
-  })
+const mongoURI = process.env.MONGO_URL;
+if (!mongoURI) {
+  console.error(" MongoDB URI is missing. Set MONGO_URI in .env file.");
+  process.exit(1);
+}
+
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log(` MongoDB connected successfully to ${mongoose.connection.name}`))
+  .catch((err) => {
+    console.error(' MongoDB connection error:', err);
+    process.exit(1);
+  });
   app.use('/user',userRoute)
   app.use('/admin',adminRoute)
   app.use('/auth',authRoute)
