@@ -32,7 +32,7 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   next();
 });
-mongoose.connect("mongodb+srv://thejasthomas001:pass@123@cluster0.dsynd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+mongoose.connect("mongodb+srv://thejasthomas001:pass@123@cluster0.dsynd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0/pedal")
   .then(()=>{
     console.log(`mongoDB connected succesfully to ${mongoose.connection.name}`);
   })
