@@ -40,8 +40,10 @@ if (!mongoURI) {
   process.exit(1);
 }
 
-mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log(` MongoDB connected successfully to ${mongoose.connection.name}`))
+// mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(mongoURI)
+
+.then(() => console.log(` MongoDB connected successfully to ${mongoose.connection.name}`))
   .catch((err) => {
     console.error(' MongoDB connection error:', err);
     process.exit(1);

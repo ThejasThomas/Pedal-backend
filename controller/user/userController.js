@@ -34,7 +34,7 @@ const fetchUserAccountData = async (req, res) => {
 };
 
 
-const signup = async (req, res) => {
+const   signup = async (req, res) => {
   try {
     const { firstName, lastName, password, confirmPassword, email, phone } = req.body;
 
@@ -45,6 +45,10 @@ const signup = async (req, res) => {
     if (password !== confirmPassword) {
       return res.status(400).json({ message: "Passwords do not match." });
     }
+    if (typeof password !== "string") {
+      return res.status(400).json({ message: "Invalid password format." });
+  }
+  
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
