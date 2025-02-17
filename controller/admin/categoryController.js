@@ -21,11 +21,21 @@ const fetchCategory = async (req, res) => {
   }
 };
 const fetchCategoryUser = async (req, res) => {
+  const { page = 1, limit = 4 } = req.query; 
+
   try {
-    const categories = await Category.find().sort({ createdAt: -1 });
+    const totalCategories = await Category.countDocuments(); 
+
+    const categories = await Category.find()
+      .sort({ createdAt: -1 }) 
+      .skip((page - 1) * limit) 
+      .limit(Number(limit));
+
     return res.status(200).json({
       success: true,
       categories,
+      totalPages: Math.ceil(totalCategories / limit), 
+      currentPage: Number(page),
     });
   } catch (error) {
     console.error("Error fetching categories:", error);
@@ -36,12 +46,12 @@ const fetchCategoryUser = async (req, res) => {
   }
 };
 
+
 const addCategory = async (req, res) => {
   try {
     const { name, image, description } = req.body;
     // console.log(req.body);
 
-    // Validate required fields
     if (!name || !image || !description) {
       return res.status(400).json({
         success: false,
@@ -54,7 +64,6 @@ const addCategory = async (req, res) => {
       folder: "categories",
     });
 
-    // Create new category with Cloudinary image URL
     const newCategory = new Category({
       name,
       images: [cloudinaryResponse.secure_url],
@@ -62,7 +71,6 @@ const addCategory = async (req, res) => {
       description,
     });
 
-    // Save category to database
     const savedCategory = await newCategory.save();
 
     return res.status(201).json({
