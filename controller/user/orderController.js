@@ -583,6 +583,7 @@ async function  retryPayment(req,res) {
       return res
       .status(404)
       .json({
+          success: false,
           message: "Order not found"
       })
     }
@@ -592,9 +593,15 @@ async function  retryPayment(req,res) {
     })
     await orderData.save()
 
-    res.status(200).json({ message: "Payment Successfull" });
+    res.status(200).json({
+       success: true,
+       message: "Payment Successfull" });
   }catch(err){
     console.log(err)
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
   }
 }
 

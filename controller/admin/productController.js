@@ -4,7 +4,7 @@ const Product = require('../../model/productModel');
 
 const fetchproducts =async(req,res)=>{
   const {page =1, limit =10,}= req.query;
-  console.log('products');
+  // console.log('products');
   
   try{
      const products = await Product.find()

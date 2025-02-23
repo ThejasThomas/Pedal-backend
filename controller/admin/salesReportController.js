@@ -15,7 +15,7 @@ const getSalesReport = async (req, res) => {
       const currentDate = new Date();
       
       switch (filterType) {
-        case 'daily':
+        case '/Daily':
           const today = new Date();
           today.setHours(0, 0, 0, 0);
           dateFilter.createdAt = {
@@ -24,7 +24,7 @@ const getSalesReport = async (req, res) => {
           };
           break;
           
-        case 'weekly':
+        case '/Weekly':
           const weekStart = new Date();
           weekStart.setDate(currentDate.getDate() - 7);
           dateFilter.createdAt = {
@@ -33,7 +33,7 @@ const getSalesReport = async (req, res) => {
           };
           break;
           
-        case 'monthly':
+        case '/Monthly':
           const monthStart = new Date();
           monthStart.setMonth(currentDate.getMonth() - 1);
           dateFilter.createdAt = {
@@ -42,7 +42,7 @@ const getSalesReport = async (req, res) => {
           };
           break;
           
-        case 'yearly':
+        case '/Yearly':
           const yearStart = new Date();
           yearStart.setFullYear(currentDate.getFullYear() - 1);
           dateFilter.createdAt = {
@@ -95,23 +95,23 @@ const getSalesReport = async (req, res) => {
         let timeKey;
         
         switch (filterType) {
-          case 'daily':
+          case '/Daily':
             timeKey = new Date(order.createdAt).toLocaleString('default', { 
               hour: 'numeric', 
               hour12: true 
             });
             break;
-          case 'weekly':
+          case '/Weekly':
             timeKey = new Date(order.createdAt).toLocaleString('default', { 
               weekday: 'long' 
             });
             break;
-          case 'monthly':
+          case '/Monthly':
             timeKey = new Date(order.createdAt).toLocaleString('default', { 
               day: 'numeric' 
             });
             break;
-          case 'yearly':
+          case '/Yearly':
           case 'custom':
             timeKey = new Date(order.createdAt).toLocaleString('default', { 
               month: 'long' 

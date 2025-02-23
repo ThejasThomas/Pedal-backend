@@ -34,6 +34,7 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   next();
 });
+<<<<<<< HEAD
 const mongoURI = process.env.MONGO_URL;
 if (!mongoURI) {
   console.error(" MongoDB URI is missing. Set MONGO_URI in .env file.");
@@ -48,6 +49,17 @@ mongoose.connect(mongoURI)
     console.error(' MongoDB connection error:', err);
     process.exit(1);
   });
+=======
+
+mongoose.connect(process.env.MONGO_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+
+  .catch(err=>{
+    console.error('MongoDB connection error:',err);     
+  })
+>>>>>>> test
   app.use('/user',userRoute)
   app.use('/admin',adminRoute)
   app.use('/auth',authRoute)
